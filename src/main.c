@@ -120,12 +120,13 @@ int main(int argc, char **argv)
     };
 
     int option, ui_return = 0;
-    char *jtf_pathname = NULL, *username = NULL,
-         *password = NULL, *jxdb_pathname = NULL;
-    bool use_plugin = true, show_application_version = false, run_ui = true,
-         create_config_file = false, use_auth = true;
+    char *jtf_pathname = NULL, *username = NULL, *password = NULL,
+         *jxdb_pathname = NULL;
+    bool show_application_version = false, run_ui = true,
+         create_config_file = false;
     xante_t *xpp = NULL;
     enum xante_session session = XANTE_SESSION_SINGLE;
+    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_PLUGIN;
 
     do {
         option = getopt_long(argc, argv, opt, long_options, NULL);
@@ -145,7 +146,7 @@ int main(int argc, char **argv)
 
             case 'T': /* test mode */
                 /* Test mode means the we're going to disable all plugin calls. */
-                use_plugin = false;
+                flags &= ~XANTE_USE_PLUGIN;
                 break;
 
             case 't': /* theme file */
@@ -162,14 +163,14 @@ int main(int argc, char **argv)
 
             case 'V': /* application version */
                 show_application_version = true;
-                use_plugin = false;
+                flags &= ~XANTE_USE_PLUGIN;
                 break;
 
             case 'C': /* create default configuration file */
                 create_config_file = true;
                 run_ui = false;
-                use_auth = false;
-                use_plugin = false;
+                flags &= ~XANTE_USE_AUTH;
+                flags &= ~XANTE_USE_PLUGIN;
 
                 if (optarg != NULL)
                     xante_env_set_cfg_path(optarg);
@@ -177,7 +178,7 @@ int main(int argc, char **argv)
                 break;
 
             case 'N': /* disable database authentication */
-                use_auth = false;
+                flags &= ~XANTE_USE_AUTH;
                 break;
 
             case 'D': /* create a default (empty) database */
@@ -187,8 +188,8 @@ int main(int argc, char **argv)
             case 'J': /* create an intermediate JXDBI file */
                 jxdb_pathname = strdup(optarg);
                 run_ui = false;
-                use_plugin = false;
-                use_auth = false;
+                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_AUTH;
                 break;
 
             case 'd': /* database path */
@@ -214,7 +215,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (use_auth == true) {
+    if ((flags & XANTE_USE_AUTH) == XANTE_USE_AUTH) {
         if ((NULL == username) || (NULL == password)) {
             error_msg(run_ui, cl_tr("A username/password must be used to "
                                     "run the application!"));
@@ -223,8 +224,7 @@ int main(int argc, char **argv)
         }
     }
 
-    xpp = xante_init(jtf_pathname, use_plugin, use_auth, session, username,
-                     password);
+    xpp = xante_init(jtf_pathname, flags, session, username, password);
 
     if (NULL == xpp) {
         error_msg(run_ui, xante_strerror(xante_get_last_error()));
