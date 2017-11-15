@@ -82,7 +82,7 @@ static void application_version(xante_t *xpp)
 {
     char *version_str = NULL;
 
-    version_str = xante_dlg_application_version(xpp);
+    version_str = xante_application_version(xpp);
 
     if (version_str != NULL) {
         printf("%s\n", version_str);
@@ -93,7 +93,7 @@ static void application_version(xante_t *xpp)
 static void error_msg(bool run_ui, const char *message)
 {
     if (run_ui) {
-        xante_dlg_messagebox(NULL, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(NULL, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              "%s", message);
     } else
         printf("%s\n", message);
@@ -111,22 +111,24 @@ static void create_xante_database(const char *pathname)
 
 int main(int argc, char **argv)
 {
-    const char *opt = "hvj:Tt:u:p:VC::ND:J:d:S:\0";
+    const char *opt = "hvj:Tt:u:p:VC::ND:J:d:S:M\0";
     struct option long_options[] = {
-        { "config",     required_argument, 0, 'C' },
-        { "help",       no_argument,       0, 'h' },
-        { "version",    no_argument,       0, 'v' },
-        { 0,            0,                 0, 0   }
+        { "config",         required_argument, 0, 'C' },
+        { "help",           no_argument,       0, 'h' },
+        { "version",        no_argument,       0, 'v' },
+        { "multi-instance", no_argument,       0, 'M' },
+        { 0,                0,                 0, 0   }
     };
 
-    int option, ui_return = 0;
+    int option, return_value = -1;
     char *jtf_pathname = NULL, *username = NULL, *password = NULL,
          *jxdb_pathname = NULL;
     bool show_application_version = false, run_ui = true,
          create_config_file = false;
     xante_t *xpp = NULL;
     enum xante_session session = XANTE_SESSION_SINGLE;
-    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_PLUGIN;
+    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_PLUGIN |
+                                  XANTE_SINGLE_INSTANCE;
 
     do {
         option = getopt_long(argc, argv, opt, long_options, NULL);
@@ -200,13 +202,14 @@ int main(int argc, char **argv)
                 session = atoi(optarg);
                 break;
 
+            case 'M': /* disable single instance */
+                flags &= ~XANTE_SINGLE_INSTANCE;
+                break;
+
             case '?':
                 return -1;
         }
     } while (option != -1);
-
-    /* TODO: This should be moved to the libxante library */
-    cl_init(NULL);
 
     if (NULL == jtf_pathname) {
         error_msg(run_ui, cl_tr("A JTF file name should be passed to the "
@@ -224,11 +227,17 @@ int main(int argc, char **argv)
         }
     }
 
-    xpp = xante_init(jtf_pathname, flags, session, username, password);
+    xpp = xante_init(argv[0], jtf_pathname, flags, session, username, password);
 
     if (NULL == xpp) {
         error_msg(run_ui, xante_strerror(xante_get_last_error()));
-        return -1;
+
+        /*
+         * We need to manually set the return value since the library was not
+         * initialized and we can't obtain its exit_value.
+         */
+        return_value = -1;
+        goto release_block;
     }
 
     if (show_application_version == true) {
@@ -255,14 +264,15 @@ int main(int argc, char **argv)
     xante_config_load(xpp);
 
     if (run_ui == true)
-        ui_return = xante_ui_run(xpp);
+        xante_ui_run(xpp);
 
-    xante_config_write(xpp, ui_return);
+    xante_config_write(xpp);
 
 end_block:
+    return_value = xante_runtime_exit_value(xpp);
     xante_uninit(xpp);
-    cl_uninit();
 
+release_block:
     if (jxdb_pathname != NULL)
         free(jxdb_pathname);
 
@@ -275,6 +285,6 @@ end_block:
     if (password != NULL)
         free(password);
 
-    return 0;
+    return return_value;
 }
 
