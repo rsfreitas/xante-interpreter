@@ -57,6 +57,8 @@ static void usage(void)
     printf("  -D [path]                  Creates a database to use by applications.\n");
     printf("  -J [filename]              Creates the JXDB file from an application.\n");
     printf("  -S [session type]          Indicates the session type of the user login.\n");
+    printf("  -M, --multi-instance       Enables the multi-instance feature of the\n\
+                                application.\n");
 
     printf("\n");
     printf("Details:\n\n");

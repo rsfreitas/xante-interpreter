@@ -32,3 +32,5 @@
 *.dSYM/
 *.log
 
+# CMake build directory
+build
