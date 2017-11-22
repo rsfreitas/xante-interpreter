@@ -129,7 +129,7 @@ int main(int argc, char **argv)
          create_config_file = false;
     xante_t *xpp = NULL;
     enum xante_session session = XANTE_SESSION_SINGLE;
-    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_PLUGIN |
+    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_MODULE |
                                   XANTE_SINGLE_INSTANCE;
 
     do {
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
             case 'T': /* test mode */
                 /* Test mode means the we're going to disable all plugin calls. */
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 break;
 
             case 't': /* theme file */
@@ -167,14 +167,14 @@ int main(int argc, char **argv)
 
             case 'V': /* application version */
                 show_application_version = true;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 break;
 
             case 'C': /* create default configuration file */
                 create_config_file = true;
                 run_ui = false;
                 flags &= ~XANTE_USE_AUTH;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
 
                 if (optarg != NULL)
                     xante_env_set_cfg_path(optarg);
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
             case 'J': /* create an intermediate JXDBI file */
                 jxdb_pathname = strdup(optarg);
                 run_ui = false;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 flags &= ~XANTE_USE_AUTH;
                 break;
 
