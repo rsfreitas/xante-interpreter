@@ -1,10 +1,10 @@
 
 /*
- * Description: A libxanter application interpreter.
+ * Description: A libjerminus application interpreter.
  *
  * Author: Rodrigo Freitas
  * Created at: Sat May  6 11:43:37 2017
- * Project: xanter
+ * Project: jerminus
  *
  * Copyright (C) 2017 Rodrigo Freitas
  *
@@ -31,15 +31,15 @@
 #include <collections.h>
 #include <libxante.h>
 
-#include "xanter.h"
+#include "jerminus.h"
 
 static void usage(void)
 {
-    printf("Usage: xanter [OPTIONS]\n");
+    printf("Usage: jerminus [OPTIONS]\n");
     printf("A libxante application interpreter.\n\n");
     printf("Options:\n\n");
     printf("  -h, --help                 Shows this help screen.\n");
-    printf("  -v, --version              Shows current xanter version.\n");
+    printf("  -v, --version              Shows current jerminus version.\n");
     printf("  -j [filename]              Indicates the JTF file pathname.\n");
     printf("  -t [filename]              Changes the UI theme.\n");
     printf("  -u [username]              Username to run the application.\n");
@@ -76,7 +76,7 @@ static void usage(void)
 
 static void version(void)
 {
-    printf("xanter - Version %d.%d.%d %s\n", MAJOR_VERSION, MINOR_VERSION,
+    printf("jerminus - Version %d.%d.%d %s\n", MAJOR_VERSION, MINOR_VERSION,
            RELEASE, (BETA == true) ? "beta" : "");
 }
 
@@ -95,8 +95,11 @@ static void application_version(xante_t *xpp)
 static void error_msg(bool run_ui, const char *message)
 {
     if (run_ui) {
+        cl_init(NULL);
         xante_dlg_messagebox(NULL, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              "%s", message);
+
+        cl_uninit();
     } else
         printf("%s\n", message);
 }
@@ -129,7 +132,7 @@ int main(int argc, char **argv)
          create_config_file = false;
     xante_t *xpp = NULL;
     enum xante_session session = XANTE_SESSION_SINGLE;
-    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_PLUGIN |
+    enum xante_init_flags flags = XANTE_USE_AUTH | XANTE_USE_MODULE |
                                   XANTE_SINGLE_INSTANCE;
 
     do {
@@ -150,7 +153,7 @@ int main(int argc, char **argv)
 
             case 'T': /* test mode */
                 /* Test mode means the we're going to disable all plugin calls. */
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 break;
 
             case 't': /* theme file */
@@ -167,14 +170,14 @@ int main(int argc, char **argv)
 
             case 'V': /* application version */
                 show_application_version = true;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 break;
 
             case 'C': /* create default configuration file */
                 create_config_file = true;
                 run_ui = false;
                 flags &= ~XANTE_USE_AUTH;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
 
                 if (optarg != NULL)
                     xante_env_set_cfg_path(optarg);
@@ -192,7 +195,7 @@ int main(int argc, char **argv)
             case 'J': /* create an intermediate JXDBI file */
                 jxdb_pathname = strdup(optarg);
                 run_ui = false;
-                flags &= ~XANTE_USE_PLUGIN;
+                flags &= ~XANTE_USE_MODULE;
                 flags &= ~XANTE_USE_AUTH;
                 break;
 

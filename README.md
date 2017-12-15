@@ -1,6 +1,25 @@
-# xanter
+# jerminus
 
 A libxante application interpreter.
+
+## License
+
+LGPLv2
+
+## Overview
+
+jerminus is a interpreter to run applications which uses libxante as its core.
+
+## Call an application
+
+An application developed using libxante can be executed with jerminus with the
+following command line:
+
+```
+$ jerminus -j application.jtf
+```
+
+For more details and options use the **-h** option.
 
 ## Compile
 
