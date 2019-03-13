@@ -1,10 +1,10 @@
 
 /*
- * Description: A libjerminus application interpreter.
+ * Description: A libxante application interpreter.
  *
  * Author: Rodrigo Freitas
  * Created at: Sat May  6 11:43:37 2017
- * Project: jerminus
+ * Project: xante-interpreter
  *
  * Copyright (C) 2017 Rodrigo Freitas
  *
@@ -28,18 +28,20 @@
 #include <string.h>
 #include <getopt.h>
 
-#include <collections.h>
-#include <libxante.h>
+#include <collections/collections.h>
+#include <xante/libxante.h>
 
-#include "jerminus.h"
+#include "xante-interpreter.h"
+
+const char *__app_name = "xante-interpreter";
 
 static void usage(void)
 {
-    printf("Usage: jerminus [OPTIONS]\n");
+    printf("Usage: %s [OPTIONS]\n", __app_name);
     printf("A libxante application interpreter.\n\n");
     printf("Options:\n\n");
     printf("  -h, --help                 Shows this help screen.\n");
-    printf("  -v, --version              Shows current jerminus version.\n");
+    printf("  -v, --version              Shows current xante-interpreter version.\n");
     printf("  -j [filename]              Indicates the JTF file pathname.\n");
     printf("  -t [filename]              Changes the UI theme.\n");
     printf("  -u [username]              Username to run the application.\n");
@@ -76,7 +78,7 @@ static void usage(void)
 
 static void version(void)
 {
-    printf("jerminus - Version %d.%d.%d %s\n", MAJOR_VERSION, MINOR_VERSION,
+    printf("%s - Version %d.%d.%d %s\n", __app_name, MAJOR_VERSION, MINOR_VERSION,
            RELEASE, (BETA == true) ? "beta" : "");
 }
 
@@ -269,7 +271,7 @@ int main(int argc, char **argv)
     xante_config_load(xpp);
 
     if (run_ui == true)
-        xante_ui_run(xpp);
+        xante_manager_run(xpp);
 
     xante_config_write(xpp);
 

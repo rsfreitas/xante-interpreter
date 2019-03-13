@@ -1,4 +1,4 @@
-project(jerminus)
+project(xante-interpreter)
 cmake_minimum_required(VERSION 2.8)
 
 # Options
@@ -21,5 +21,5 @@ file(GLOB SOURCES "src/*c")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 link_directories("/usr/local/lib")
-target_link_libraries(${PROJECT_NAME} xante collections)
+target_link_libraries(${PROJECT_NAME} xante collections intl)
 
